@@ -12,11 +12,16 @@ on:
 jobs:
   build-ma-image:
     runs-on: ubuntu-latest
+    
     permissions:
       packages: write
       contents: read
       attestations: write
       id-token: write
+    
+    env:
+      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/my-multi-arch-image:latest
+      
     steps:
       # Checkout the code
       - name: Checkout code
@@ -35,23 +40,39 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Build multi-architecture Docker image (for amd64 and arm64)
+      #- name: Build and push multi-architecture image
+      #  run: |
+      #    # Define platforms you want to build for
+      #    platforms="linux/amd64,linux/arm64"
+      #
+      #    # Build the Docker image using Buildx
+      #    docker buildx build --platform $platforms --file Dockerfile --tag ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME --push .
+      #
+      #    # Make the image public via GitHub API
+      #    curl -X PATCH \
+      #      -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+      #      -H "Accept: application/vnd.github.v3+json" \
+      #      -d '{"visibility": "public"}' \
+      #      https://api.github.com/user/packages/container/ghcr.io%2F${{ github.repository_owner }}%2F$IMAGE_NAME/versions/latest
+      #
+      #    # Print image url
+      #    echo ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+
+      # Build and push multi-architecture image using docker/build-push-action
       - name: Build and push multi-architecture image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_NAME }}
+          platforms: linux/amd64,linux/arm64
+
+      # Make the image public via GitHub API
+      - name: Set image visibility to public
         run: |
-          # Define platforms you want to build for
-          platforms="linux/amd64,linux/arm64"
-
-          # Define image name and tag
-          IMAGE_NAME_AND_TAG="my-multi-arch-image:latest"
-
-          # Build the Docker image using Buildx
-          docker buildx build --platform $platforms --file Dockerfile --tag ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME_AND_TAG --push .
-
-          # Make the image public via GitHub API
           curl -X PATCH \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             -d '{"visibility": "public"}' \
-            https://api.github.com/user/packages/container/ghcr.io%2F${{ github.repository_owner }}%2F$IMAGE_NAME_AND_TAG/versions/latest
-
-          # Print image url
-          echo ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME_AND_TAG
+            https://api.github.com/user/packages/container/ghcr.io%2F${{ github.repository_owner }}%2F$IMAGE_NAME/versions/latest
