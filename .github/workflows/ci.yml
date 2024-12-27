@@ -91,6 +91,7 @@ jobs:
 
       # Build and push multi-architecture image using docker/build-push-action
       - name: Build and push multi-architecture image
+        id: push
         uses: docker/build-push-action@v4
         with:
           context: .
