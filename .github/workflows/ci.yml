@@ -20,6 +20,7 @@ jobs:
       id-token: write
     
     env:
+      IMAGE_BASE_NAME: my-multi-arch-image
       IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/my-multi-arch-image:latest
       IMAGE_NAME_GITLAB: registry.gitlab.com/${{ secrets.GITLAB_NAMESPACE }}/my-multi-arch-image:latest
       
@@ -68,11 +69,25 @@ jobs:
       #    echo ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
 
       # Remove previous versions
-      - uses: actions/delete-package-versions@v5
-        with: 
-          package-name: '${{ env.IMAGE_NAME }}'
-          package-type: 'container'
-          token: ${{ secrets.GITHUB_TOKEN }}
+      #- uses: actions/delete-package-versions@v5
+      #  with: 
+      #    package-name: '${{ env.IMAGE_BASE_NAME }}'
+      #    package-type: 'container'
+      #    token: ${{ secrets.GITHUB_TOKEN }}
+      #
+      #- name: Delete previous container package versions
+      #  uses: actions/delete-package-versions@v5
+      #  with:
+      #    # Replace with the package name and version(s) you want to delete
+      #    package-name: "${{ env.IMAGE_BASE_NAME }}"
+      #    package-type: 'container'
+      #    version: "1.0.0"
+      #    # Optional: Set this to true if you want to force delete (use carefully)
+      #    force: false
+      #    # Optional: Set to true to delete the latest version of the package
+      #    delete_latest: true
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Build and push multi-architecture image using docker/build-push-action
       - name: Build and push multi-architecture image
