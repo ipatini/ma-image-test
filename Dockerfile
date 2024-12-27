@@ -1,0 +1,1 @@
+FROM registry.gitlab.com/nebulous-project/ems-main/ems-client:latest
