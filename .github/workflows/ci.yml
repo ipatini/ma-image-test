@@ -102,10 +102,18 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
 
       # Make the image public via GitHub API
-      - name: Set image visibility to public
-        run: |
-          curl -X PATCH \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -d '{"visibility": "public"}' \
-            https://api.github.com/user/packages/container/ghcr.io%2F${{ github.repository_owner }}%2F$IMAGE_NAME/versions/latest
+      #- name: Set image visibility to public
+      #  run: |
+      #    curl -X PATCH \
+      #      -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+      #      -H "Accept: application/vnd.github.v3+json" \
+      #      -d '{"visibility": "public"}' \
+      #      https://api.github.com/user/packages/container/ghcr.io%2F${{ github.repository_owner }}%2F$IMAGE_NAME/versions/latest
+
+      # Generate artifact attestation
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.IMAGE_NAME}}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
